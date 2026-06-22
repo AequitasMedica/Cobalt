@@ -2,7 +2,7 @@
 
 ## Bienvenida
 
-En Aequitas Medica creemos que la credibilidad de un resultado es proporcional a la transparencia con la que fue construido.
+En Aequitas Medica creemos que la ciencia debe construirse con métodos claros, trazables y abiertos a revisión.
 
 Por eso, utilizamos herramientas de código abierto y compartimos nuestros scripts en repositorios públicos, con el propósito de que puedan ser revisados, auditados, adaptados y reutilizados por otros equipos académicos y científicos.
 
