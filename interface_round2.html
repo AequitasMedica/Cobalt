@@ -1,0 +1,1233 @@
+<html>
+
+<!-- Set up font -->	
+<link href="https://fonts.googleapis.com/css2?family=Afacad&display=swap" rel="stylesheet">
+
+<style>
+    * {
+        font-family: "Afacad", sans-serif;
+        font-size: medium;
+        font-weight: 100;
+    }
+
+    .score-grid {
+        display: grid;
+        grid-template-columns: repeat(17, minmax(0, 1fr));
+        align-items: center;
+        justify-items: center;
+        width: 100%;
+    }
+
+    .score-radio-input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .score-button {
+        display: inline-block;
+        width: 36px;
+        height: 36px;
+        line-height: 36px;
+        border-radius: 50%;
+        border: 2px solid #E8EAEF;
+        background: white;
+        padding: 0;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        color: #182230;
+        font-size: 15px;
+        text-align: center;
+        user-select: none;
+    }
+
+    .score-radio-input:checked + .score-button {
+        background: #0BAAAA;
+        border-color: #0BAAAA;
+        color: white;
+        font-weight: bold;
+    }
+
+    .score-radio-input:focus + .score-button {
+        outline: 3px solid rgba(11, 170, 170, 0.35);
+        outline-offset: 3px;
+    }
+
+    .score-button:hover {
+        border-color: #0BAAAA;
+    }
+
+    #saveStatus {
+        color: #696969;
+        font-size: 12px;
+        white-space: nowrap;
+        align-self: center;
+    }
+
+    #saveStatus.error {
+        color: #A83880;
+    }
+
+    #saveStatus.saved {
+        color: #0BAAAA;
+    }
+
+    .comparison-marker {
+        width: 50px;
+        height: 6px;
+        line-height: 6px;
+        border: 2px solid white;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    .comparison-bar {
+        width: 50px;
+        height: 6px;
+        line-height: 6px;
+        border: 2px solid #E8EAEF;
+        background-color: gray;
+        box-sizing: border-box;
+    }
+
+
+    #confidentialityNotice {
+        position: fixed;
+        inset: 0;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        padding: 24px;
+        background: rgba(24, 34, 48, 0.88);
+        backdrop-filter: blur(10px);
+        z-index: 10000;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    #confidentialityNotice.visible {
+        display: flex;
+    }
+
+    #confidentialityNoticeBox {
+        max-width: 620px;
+        background: #ffffff;
+        color: #182230;
+        border-radius: 12px;
+        padding: 28px 34px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        border-top: 6px solid #0BAAAA;
+    }
+
+    #confidentialityNoticeBox i {
+        color: #0BAAAA;
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+
+    #confidentialityNoticeBox p {
+        margin: 8px 0 0 0;
+        font-size: 18px;
+        line-height: 1.35;
+        font-weight: 400;
+    }
+
+    body.confidentiality-blur main,
+    body.confidentiality-blur #nameBox {
+        filter: blur(10px);
+        pointer-events: none;
+        user-select: none;
+    }
+
+    #confidentialityPrintMessage {
+        display: none;
+    }
+
+    @media print {
+        body > *:not(#confidentialityPrintMessage) {
+            display: none !important;
+        }
+
+        #confidentialityPrintMessage {
+            display: flex !important;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            box-sizing: border-box;
+            color: #182230;
+            font-size: 22px;
+            line-height: 1.4;
+            text-align: center;
+        }
+    }
+#focusPrivacyShield {
+        position: fixed;
+        inset: 0;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        padding: 24px;
+        background: #182230;
+        color: #ffffff;
+        z-index: 9999;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    #focusPrivacyShield.visible {
+        display: flex;
+    }
+
+    #focusPrivacyShield p {
+        max-width: 680px;
+        margin: 0;
+        font-size: 20px;
+        line-height: 1.4;
+        font-weight: 500;
+    }
+
+
+</style>
+
+<!-- Set up fa fa icon -->	
+<link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<head>
+	<meta charset="UTF-8">
+	<body>
+<div id="focusPrivacyShield" aria-hidden="true">
+    <p>Contenido oculto temporalmente para proteger la confidencialidad del estudio.</p>
+</div>
+
+<div id="confidentialityNotice" role="alert" aria-live="assertive" aria-hidden="true">
+    <div id="confidentialityNoticeBox">
+        <i class="fas fa-lock"></i>
+        <p>La captura de pantalla ha sido inhabilitada para mantener los requisitos de confidencialidad del estudio.</p>
+    </div>
+</div>
+
+<div id="confidentialityPrintMessage">
+    La captura de pantalla ha sido inhabilitada para mantener los requisitos de confidencialidad del estudio.
+</div>
+
+
+<div id="nameModal"
+     style="
+        position:fixed;
+        inset:0;
+        background:rgba(0,0,0,.45);
+        backdrop-filter:blur(8px);
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        z-index:9999;
+     ">
+
+    <div id="nameBox"
+         style="
+            background:white;
+            padding:30px;
+            border-radius:10px;
+            text-align:center;
+            width:400px;
+            box-shadow:0 0 20px rgba(0,0,0,.3);
+         ">
+
+        <h2 style="margin-top:0;">
+            Seleccione su nombre
+        </h2>
+
+        <select
+            id="panelistInput"
+            style="
+                width:90%;
+                padding:10px;
+                margin-bottom:15px;
+                font-size:16px;
+            ">
+            <option value="">Cargando panelistas...</option>
+        </select>
+
+        <p style="margin:0 0 15px 0; color:#696969; font-size:14px; line-height:1.3;">
+            La lista se genera con las respuestas guardadas de la primera ronda.
+        </p>
+
+        <br>
+
+        <button
+            id="startBtn"
+            style="
+                padding:10px 20px;
+                font-size:16px;
+                cursor:pointer;
+            ">
+            Comenzar
+        </button>
+
+    </div>
+
+</div>
+
+		<main>
+<!-- Top section -->	
+
+			<table style="border-collapse: collapse; height: 5%; width: 100%; background-color: #182230; vertical-align: middle;">
+				<tr>
+					<th style="padding-left: 5px; width: 3%; color: white; text-align: left;">
+						 <i style="font-size:24px" class="fas fa-users"></i>
+					</th>
+
+					<th style="padding-left: 5px; width: 27%; border-right-color: white; border-right-style: solid; border-right-width: 1px; color: white; text-align: left;">
+							<span style="font-weight: bold;">Consenso RAND/UCLA</span>
+
+							<br>
+
+							<span style="font-weight: lighter;">Cuestionario de consenso</span>
+					</th>
+
+					<th style="padding-left: 5px; width: 12; border-right-color: white; border-right-style: solid; border-right-width: 1px; color: white; text-align: left;">
+						<span id="placeholder1" style="color: #0BAAAA; font-size: xx-large;"> &#9313;</span>
+						<span style="color: white;"> ronda</span>
+					</th>
+
+					<th style="padding-left: 5px; width: 15%; color: white; text-align: left;">
+						<span style="color: white;"> Pregunta</span>
+						<span id="placeholder2" style="color: #0BAAAA;"> 4</span>
+						<span style="color: white;"> de </span>
+						<span id="placeholder3" style="color: white;">28</span>
+					</th>
+
+					<th style="padding-left: 5px; width: 18%; border-left-color: white; border-left-style: solid; border-left-width: 1px; color: white; text-align: left;">
+						<span id="placeholder4" style="color: white;">Dr. Tontobayo</span>
+					</th>
+
+
+					<th style="padding-left:5px; width:25%; text-align:right;">
+                        <div style="display:flex; justify-content:flex-end; align-items:center; gap:8px;">
+                            <span style="color:white; font-size:11px; letter-spacing:.04em; opacity:.8;">powered by</span>
+                            <a href="https://www.aequitasmedica.com" target="_blank" rel="noopener noreferrer" aria-label="Aequitas Medica website"><img src="Logo.png" width="250" alt="Aequitas Medica" style="display:block;"></a>
+                        </div>
+                    </th>
+
+				</tr>
+
+			</table>
+
+<!-- Progress bar section -->
+			<table style="border-collapse: collapse; height:9%; width: 100%; background-color: #DFE7EF;">
+
+				<tr style="width: 90%;">
+					<td style="display: flex; justify-content: center; align-items: center;">
+						<progress id="progressBar" value="4" max="28" style="accent-color: #0BAAAA; width: 90%;"></progress>
+					</td>
+				</tr>
+				<tr>
+					<td style="display: flex; justify-content: center; align-items: center;">
+						<span id="placeholder5">14</span>
+						<span>% completado</span>
+					</td>
+				</tr>
+
+			</table>
+
+<!-- Questions section -->
+			<table style="border-collapse: collapse; height: 78%; width: 100%; background-color: #DFE7EF;">
+				<tr>
+					<td align="center">
+						<table style=" width: 90%; height: 100%; background-color: #ffffff; border-radius: 10px; border-collapse: separate; overflow: hidden;">
+<!-- White container -->
+							<tr>
+								<td align="center">
+									<table style=" width: 90%; height: 35%; background-color: #ffffff; border-radius: 10px; border-collapse: separate; overflow: hidden;">
+<!-- Question block -->
+										<tr>
+											<td style="width: 80%; text-align: left;">
+												<span style="color: #0BAAAA; font-size: small;">
+													Pregunta
+												</span>
+
+												<span id="placeholder6" style="color: #182230;font-size: small; ">
+													4
+												</span>
+												
+											</td>
+											<td rowspan="3" style="width: 20%; padding: 10px; vertical-align: top;">
+												<table style="width: 100%; height: 100%; border: 2px solid #E8EAEF; border-radius: 10px; border-collapse: separate;">
+													<tr>
+														<td style="font-size: small; padding: 10px; color: #182230; text-align: center;"><i style='font-size:24px' class='fas'>&#xf007;</i></td>
+														<td style="font-size: small; padding: 10px; color: #182230;">Tu respuesta anterior</td>
+													</tr>
+													<tr>
+														<td style="font-size: small; padding: 10px; color: #182230; text-align: center"><i style='font-size:24px' class='fas'>&#xf0c0;</i></td>
+														<td style="font-size: small; padding: 10px; color: #182230;">Mediana grupal</td>
+													</tr>
+													<tr>
+														<td style="font-size: small; padding: 10px; color: #0BAAAA; text-align: center"><i style='font-size:24px' class='fas'>&#xf0c0;</i></td>
+														<td style="font-size: small; padding: 10px; color: #0BAAAA;">Consenso</td>
+													</tr>
+												</table>
+											</td>
+
+										</tr>
+										
+										<tr>
+											<td id="placeholder7" style="color: #182230; font-weight: bold; font-size: x-large;">Pregunta del consenso</td>
+										</tr>
+										
+										<tr>
+											<td style="color: #182230; font-weight: thin; font-size: small;">Seleccione una puntuación del 1 al 9, donde 1 representa "muy poco apropiado" y 9 representa "muy apropiado".</td>
+										</tr>
+									</table>
+<!-- Cuadros de PICO y ratings -->
+									<table style=" width: 90%; height: 55%; background-color: #ffffff; border-radius: 10px; border-collapse: separate; overflow: hidden;">
+										<tr>
+											<td>
+												<!-- Cuadros -->
+												<table style=" width: 100%; height: 42%; background-color: #ffffff; border-radius: 10px; border-collapse: separate; overflow: hidden;">
+													<tr>
+														<th style="width: 25%">
+															<table style="width: 100%; height: 100%; background-color: #ffffff; border-radius: 10px; border-collapse: separate; border: 2px solid #E8EAEF; overflow: hidden;">
+																<tr>
+																	<td>
+																		<td>
+																			<div style="width: 36px;  height: 36px; line-height: 36px; border-radius: 50%; background-color: #A83880; color: #ffffff; text-align: center; font-weight: bold; font-size: 20px;">P</div>
+																		</td>
+																		<td>
+																			<span style="color: #A83880;">Paciente</span>
+																			<br>
+																			<span id="placeholder8" style="color: #182230; font-weight: thin; font-size: small;">Pacientes pediátricos con infecciones respiratorias recurrentes</span>
+																		</td>
+																	</td>
+																</tr>
+															</table>
+														</th>
+														<th style="width: 25%">
+															<table style="width: 100%; height: 100%; background-color: #ffffff; border-radius: 10px; border-collapse: separate; border: 2px solid #E8EAEF; overflow: hidden;">
+																<tr>
+																	<td>
+																		<td>
+																			<div style="width: 36px;  height: 36px; line-height: 36px; border-radius: 50%; background-color: #0BAAAA; color: #ffffff; text-align: center; font-weight: bold; font-size: 20px;">I</div>
+																		</td>
+																		<td>
+																			<span style="color: #0BAAAA;">Intervención</span>
+																			<br>
+																			<span id="placeholder9" style="color: #182230; font-weight: thin; font-size: small;">Intervención</span>
+																		</td>
+																	</td>
+																</tr>
+															</table>
+														</th>
+														<th style="width: 25%">
+															<table style="width: 100%; height: 100%; background-color: #ffffff; border-radius: 10px; border-collapse: separate; border: 2px solid #E8EAEF; overflow: hidden;">
+																<tr>
+																	<td>
+																		<td>
+																			<div style="width: 36px;  height: 36px; line-height: 36px; border-radius: 50%; background-color: #182230; color: #ffffff; text-align: center; font-weight: bold; font-size: 20px;">C</div>
+																		</td>
+																		<td>
+																			<span style="color: #182230;">Comparador</span>
+																			<br>
+																			<span id="placeholder10" style="color: #182230; font-weight: thin; font-size: small;">Placebo</span>
+																		</td>
+																	</td>
+																</tr>
+															</table>
+														</th>
+														<th style="width: 25%">
+															<table style="width: 100%; height: 100%; background-color: #ffffff; border-radius: 10px; border-collapse: separate; border: 2px solid #E8EAEF; overflow: hidden;">
+																<tr>
+																	<td>
+																		<td>
+																			<div style="width: 36px;  height: 36px; line-height: 36px; border-radius: 50%; background-color: #7455A3; color: #ffffff; text-align: center; font-weight: bold; font-size: 20px;">O</div>
+																		</td>
+																		<td>
+																			<span style="color: #7455A3;">Desenlace (Outcome)</span>
+																			<br>
+																			<span id="placeholder11" style="color: #182230; font-weight: thin; font-size: small;">Reducción de la duración de las infecciones respiratorias</span>
+																		</td>
+																	</td>
+																</tr>
+															</table>
+														</th>
+													</tr>
+												</table>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<!-- Ratings -->
+												<table style="width: 100%; height: 22%; background-color: #ffffff; border-collapse: separate; text-align: center;">
+													<tr>
+														<th style="width: 100%; text-align: center;">
+															<div class="score-grid" role="radiogroup" aria-label="Seleccione una puntuación del 1 al 9">
+																<input type="radio" id="Btn1" name="answerScore" value="1" class="score-radio-input" required><label for="Btn1" class="score-button" style="grid-column: 1;">1</label>
+																<input type="radio" id="Btn2" name="answerScore" value="2" class="score-radio-input" required><label for="Btn2" class="score-button" style="grid-column: 3;">2</label>
+																<input type="radio" id="Btn3" name="answerScore" value="3" class="score-radio-input" required><label for="Btn3" class="score-button" style="grid-column: 5;">3</label>
+																<input type="radio" id="Btn4" name="answerScore" value="4" class="score-radio-input" required><label for="Btn4" class="score-button" style="grid-column: 7;">4</label>
+																<input type="radio" id="Btn5" name="answerScore" value="5" class="score-radio-input" required><label for="Btn5" class="score-button" style="grid-column: 9;">5</label>
+																<input type="radio" id="Btn6" name="answerScore" value="6" class="score-radio-input" required><label for="Btn6" class="score-button" style="grid-column: 11;">6</label>
+																<input type="radio" id="Btn7" name="answerScore" value="7" class="score-radio-input" required><label for="Btn7" class="score-button" style="grid-column: 13;">7</label>
+																<input type="radio" id="Btn8" name="answerScore" value="8" class="score-radio-input" required><label for="Btn8" class="score-button" style="grid-column: 15;">8</label>
+																<input type="radio" id="Btn9" name="answerScore" value="9" class="score-radio-input" required><label for="Btn9" class="score-button" style="grid-column: 17;">9</label>
+															</div>
+														</th>
+													</tr>
+												</table>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<!-- Comparativas -->
+												<table style="width: 100%; height: 22%; background-color: #ffffff; border-collapse: separate; text-align: center;">
+													<tr>
+														<th style="width: 100%; text-align: center;">
+															<div class="score-grid">
+																		<div id="placeholder12" class="comparison-marker" style="grid-column: 1;">|</div>
+																		<div id="placeholder13" class="comparison-marker" style="grid-column: 2;">|</div>
+																		<div id="placeholder14" class="comparison-marker" style="grid-column: 3;">|</div>
+																		<div id="placeholder15" class="comparison-marker" style="grid-column: 4;">|</div>
+																		<div id="placeholder16" class="comparison-marker" style="grid-column: 5;">|</div>
+																		<div id="placeholder17" class="comparison-marker" style="grid-column: 6;">|</div>
+																		<div id="placeholder18" class="comparison-marker" style="grid-column: 7;">|</div>
+																		<div id="placeholder19" class="comparison-marker" style="grid-column: 8;">|</div>
+																		<div id="placeholder20" class="comparison-marker" style="grid-column: 9;">|</div>
+																		<div id="placeholder21" class="comparison-marker" style="grid-column: 10;">|</div>
+																		<div id="placeholder22" class="comparison-marker" style="grid-column: 11;">|</div>
+																		<div id="placeholder23" class="comparison-marker" style="grid-column: 12;">|</div>
+																		<div id="placeholder24" class="comparison-marker" style="grid-column: 13;">|</div>
+																		<div id="placeholder25" class="comparison-marker" style="grid-column: 14;">|</div>
+																		<div id="placeholder26" class="comparison-marker" style="grid-column: 15;">|</div>
+																		<div id="placeholder27" class="comparison-marker" style="grid-column: 16;">|</div>
+																		<div id="placeholder28" class="comparison-marker" style="grid-column: 17;">|</div>
+															</div>
+														</th>
+													</tr>
+												</table>
+												<table style="width: 100%; height: 22%; background-color: #ffffff; border-collapse: separate; text-align: center;">
+													<tr>
+														<th style="width: 100%; text-align: center;">
+															<div class="score-grid">
+																		<div id="placeholder29" class="comparison-bar" style="grid-column: 1;"></div>
+																		<div id="placeholder30" class="comparison-bar" style="grid-column: 3;"></div>
+																		<div id="placeholder31" class="comparison-bar" style="grid-column: 5;"></div>
+																		<div id="placeholder32" class="comparison-bar" style="grid-column: 7;"></div>
+																		<div id="placeholder33" class="comparison-bar" style="grid-column: 9;"></div>
+																		<div id="placeholder34" class="comparison-bar" style="grid-column: 11;"></div>
+																		<div id="placeholder35" class="comparison-bar" style="grid-column: 13;"></div>
+																		<div id="placeholder36" class="comparison-bar" style="grid-column: 15;"></div>
+																		<div id="placeholder37" class="comparison-bar" style="grid-column: 17;"></div>
+															</div>
+														</th>
+													</tr>
+												</table>
+												<table style="width: 100%; height: 22%; background-color: #ffffff; border-collapse: separate; text-align: center;">
+													<tr>
+														<th style="width: 100%; text-align: center;">
+															<div class="score-grid">
+																		<div id="placeholder38" class="comparison-marker" style="grid-column: 1;"></div>
+																		<div id="placeholder39" class="comparison-marker" style="grid-column: 3;"></div>
+																		<div id="placeholder40" class="comparison-marker" style="grid-column: 5;"></div>
+																		<div id="placeholder41" class="comparison-marker" style="grid-column: 7;"></div>
+																		<div id="placeholder42" class="comparison-marker" style="grid-column: 9;"></div>
+																		<div id="placeholder43" class="comparison-marker" style="grid-column: 11;"></div>
+																		<div id="placeholder44" class="comparison-marker" style="grid-column: 13;"><i style="font-size:12px" class="fas fa-user"></i></div>
+																		<div id="placeholder45" class="comparison-marker" style="grid-column: 15;"></div>
+																		<div id="placeholder46" class="comparison-marker" style="grid-column: 17;"></div>
+															</div>
+														</th>
+													</tr>
+												</table>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<!-- Escala -->
+												<table style="width: 100%; height: 16%; background-color: #ffffff; border-radius: 10px; border-collapse: separate; overflow: hidden;">
+													<tr>
+														<th style="width: 33%;">
+															<div style="width: 100%; border-radius: 10%; background-color: #F5E8F1; color: #A83880; text-align: center; font-weight: thin; font-size: 15px;">Poco apropiado</div>
+														</th>
+														<th style="width: 33%;">
+															<div style="width: 100%; border-radius: 10%; background-color: #EFE6F4; color: #7455A3; text-align: center; font-weight: thin; font-size: 15px;">Incierto</div>
+														</th>
+														<th style="width: 33%;">
+															<div style="width: 100%; border-radius: 10%; background-color: #DCEFF0; color: #0BAAAA; text-align: center; font-weight: thin; font-size: 15px;">Muy apropiado</div>
+														</th>
+													</tr>
+												</table>
+											</td>
+										</tr>
+										<!-- Notas y botones -->
+
+										<tr>
+											<td>
+												<!-- Comentarios -->
+												<table style="width: 100%; height: 12%; background-color: #ffffff; border-radius: 10px; border-collapse: separate; overflow: hidden;">
+													<tr>
+														<td style="padding: 10px 0;">
+															<input id="placeholder47" type="text" placeholder="Si tiene comentarios introdúzcalos aquí" style="width: 100%; box-sizing: border-box; padding: 12px 16px; border-radius: 10px; border: 2px solid #E8EAEF; background-color: white; color: #182230; font-size: 15px; outline: none;">
+														</td>
+													</tr>
+												</table>
+											</td>
+										</tr>
+
+
+
+										<tr>
+											<td>
+												<table style="width: 90%; background-color: #ffffff; border-collapse: collapse; margin: auto;">
+													<tr>
+														<td style="width: 80%; text-align: left; vertical-align: middle; padding: 10px;">
+															<span><i style="color: #696969;" class="fa">&#xf05a;</i></span>
+															<span style="font-weight: bold; color: #696969;">Definición "Apropiado":</span>
+															<span style="font-weight: normal; color: #696969;">El beneficio teórico supera el riesgo esperado. </span>
+															<span id="placeholder48" style="font-weight: normal; color: #696969;">|</span>
+														</td>
+														<td style="width: 20%; padding: 10px;">
+															<div style="display: flex; justify-content: flex-end; gap: 10px;; align-items: center;">
+																<span id="saveStatus" aria-live="polite"></span>
+																															<button id="prevBtn" style="padding: 8px 16px; border-radius: 6px; background-color: white; border: 2px solid #E8EAEF; color: #182230; text-align: center; font-size: 15px; white-space: nowrap; cursor: pointer;">Anterior</button>
+																<button id="nextBtn" style="padding: 8px 16px; border-radius: 6px; background-color: #0BAAAA; border: 2px solid #0BAAAA; color: white; text-align: center; font-size: 15px; white-space: nowrap; cursor: pointer;">Siguiente</button>
+															</div>
+														</td>
+													</tr>
+												</table>
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+
+<!-- Footer -->
+			<table style="border-collapse: collapse; height:4%; width: 100%; background-color: #DFE7EF;">
+
+				<tr>
+					<td>
+					</td>
+				</tr>
+
+			</table>
+
+		</main>
+
+<!-- CSV loader, two-round logic, autosave, and screen navigation -->
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<script>
+const ROUND_NUMBER = 2;
+const START_MODE = 'select';
+
+let csvData = [];
+let currentRow = 0;
+let panelistName = '';
+let responseCache = {};
+let previousRoundAnswers = {};
+let round1Stats = {};
+let saveTimer = null;
+let saveInProgress = false;
+let confidentialityNoticeTimer = null;
+
+const CSV_FILES = ['placeholders.csv', 'placeholders(4).csv', 'placeholders(1).csv'];
+const TOTAL_PLACEHOLDERS = 48;
+const SAVE_ENDPOINT = 'save.php';
+const LOCAL_STORAGE_PREFIX = 'rand_ucla_round_' + ROUND_NUMBER + '_';
+const USER_ICON = "<i style='font-size:10px' class='fas fa-user'></i>";
+const GROUP_ICON_CONSENSUS = "<i style='font-size:10px; color:#0BAAAA;' class='fas fa-users'></i>";
+const GROUP_ICON_NO_CONSENSUS = "<i style='font-size:10px; color:#182230;' class='fas fa-users'></i>";
+const DISTRIBUTION_COLORS = ['#FFFFFF', '#F2F2F2', '#D9D9D9', '#BFBFBF', '#6B6B6B'];
+const CONFIDENTIALITY_MESSAGE = 'La captura de pantalla ha sido inhabilitada para mantener los requisitos de confidencialidad del estudio.';
+
+function showConfidentialityNotice() {
+    const notice = document.getElementById('confidentialityNotice');
+    if (!notice) return;
+    clearTimeout(confidentialityNoticeTimer);
+    notice.classList.add('visible');
+    notice.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('confidentiality-blur');
+    confidentialityNoticeTimer = setTimeout(function() {
+        notice.classList.remove('visible');
+        notice.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('confidentiality-blur');
+    }, 2600);
+}
+
+function isScreenshotOrPrintShortcut(event) {
+    const key = String(event.key || '').toLowerCase();
+    const code = String(event.code || '').toLowerCase();
+    return key === 'printscreen' || code === 'printscreen' ||
+        ((event.ctrlKey || event.metaKey) && key === 'p') ||
+        ((event.ctrlKey || event.metaKey) && event.shiftKey && ['s', '3', '4', '5'].includes(key));
+}
+
+function handleConfidentialityShortcut(event) {
+    if (!isScreenshotOrPrintShortcut(event)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    showConfidentialityNotice();
+    if (event.key && event.key.toLowerCase() === 'printscreen' && navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(CONFIDENTIALITY_MESSAGE).catch(function() {});
+    }
+    return false;
+}
+
+function showFocusPrivacyShield() {
+    const shield = document.getElementById('focusPrivacyShield');
+    if (shield) shield.classList.add('visible');
+}
+
+function hideFocusPrivacyShield() {
+    const shield = document.getElementById('focusPrivacyShield');
+    if (shield) shield.classList.remove('visible');
+}
+
+function installConfidentialityControls() {
+    document.addEventListener('keydown', handleConfidentialityShortcut, true);
+    document.addEventListener('keyup', handleConfidentialityShortcut, true);
+    document.addEventListener('contextmenu', function(event) {
+        event.preventDefault();
+        showConfidentialityNotice();
+    }, true);
+    document.addEventListener('dragstart', function(event) { event.preventDefault(); }, true);
+    document.addEventListener('copy', function(event) {
+        event.preventDefault();
+        showConfidentialityNotice();
+    }, true);
+    document.addEventListener('cut', function(event) {
+        event.preventDefault();
+        showConfidentialityNotice();
+    }, true);
+    window.addEventListener('beforeprint', showConfidentialityNotice);
+    window.addEventListener('blur', showFocusPrivacyShield);
+    window.addEventListener('focus', hideFocusPrivacyShield);
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) showFocusPrivacyShield();
+        else hideFocusPrivacyShield();
+    });
+}
+
+async function fetchTextFromFirstAvailable(files) {
+    let lastError = null;
+    for (const file of files) {
+        try {
+            const response = await fetch(file, { cache: 'no-store' });
+            if (!response.ok) {
+                lastError = new Error(`${file}: HTTP ${response.status}`);
+                continue;
+            }
+            const buffer = await response.arrayBuffer();
+            return new TextDecoder('utf-8').decode(buffer);
+        } catch (error) {
+            lastError = error;
+        }
+    }
+    throw new Error(`No se encontró el CSV. Intenté: ${files.join(', ')}. ${lastError ? lastError.message : ''}`);
+}
+
+async function loadCSV() {
+    const csvText = await fetchTextFromFirstAvailable(CSV_FILES);
+    Papa.parse(csvText, {
+        header: true,
+        skipEmptyLines: 'greedy',
+        transformHeader: function(header) { return header.trim().replace(/^\uFEFF/, ''); },
+        complete: function(results) {
+            csvData = results.data.filter(function(row) {
+                return Object.keys(row).some(function(key) {
+                    return key && key.startsWith('placeholder') && String(row[key] ?? '').trim() !== '';
+                });
+            });
+            if (!csvData.length) {
+                showLoadError('El CSV cargó, pero no se encontraron filas útiles.');
+                return;
+            }
+            currentRow = 0;
+            loadRow(currentRow);
+        },
+        error: function(error) { showLoadError(`Error al leer el CSV: ${error.message}`); }
+    });
+}
+
+async function loadPanelistDropdown() {
+    if (START_MODE !== 'select') return;
+    const select = document.getElementById('panelistInput');
+    if (!select) return;
+    select.innerHTML = '<option value="">Cargando panelistas...</option>';
+    select.disabled = true;
+    try {
+        const response = await fetch(`${SAVE_ENDPOINT}?action=list_panelists`, { cache: 'no-store' });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || 'No se pudo cargar la lista de panelistas.');
+        select.innerHTML = '<option value="">Seleccione su nombre</option>';
+        (result.panelists || []).forEach(function(name) {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            select.appendChild(option);
+        });
+        if (!result.panelists || result.panelists.length === 0) {
+            select.innerHTML = '<option value="">No hay respuestas de ronda 1 todavía</option>';
+        }
+        select.disabled = false;
+    } catch (error) {
+        console.error(error);
+        select.innerHTML = '<option value="">No se pudo cargar la lista</option>';
+        select.disabled = false;
+    }
+}
+
+function isComparisonMarkerPlaceholder(index) {
+    return (index >= 12 && index <= 28) || (index >= 38 && index <= 46);
+}
+
+function clearComparisonMarkers() {
+    for (let i = 12; i <= 28; i++) {
+        const element = document.getElementById(`placeholder${i}`);
+        if (element) { element.innerHTML = ''; element.title = ''; }
+    }
+    for (let i = 29; i <= 37; i++) {
+        const element = document.getElementById(`placeholder${i}`);
+        if (element) {
+            element.innerHTML = '';
+            element.title = '';
+            element.style.backgroundColor = DISTRIBUTION_COLORS[0];
+        }
+    }
+    for (let i = 38; i <= 46; i++) {
+        const element = document.getElementById(`placeholder${i}`);
+        if (element) { element.innerHTML = ''; element.title = ''; }
+    }
+}
+
+function percentageToGrayscaleStep(percentage) {
+    const p = Number(percentage);
+    if (!Number.isFinite(p) || p <= 0) return DISTRIBUTION_COLORS[0];
+    if (p <= 10) return DISTRIBUTION_COLORS[1];
+    if (p <= 25) return DISTRIBUTION_COLORS[2];
+    if (p <= 50) return DISTRIBUTION_COLORS[3];
+    return DISTRIBUTION_COLORS[4];
+}
+
+function renderRoundOneDistribution(stat) {
+    for (let answer = 1; answer <= 9; answer++) {
+        const element = document.getElementById(`placeholder${28 + answer}`);
+        if (!element) continue;
+        const count = Number(stat?.counts?.[answer] ?? stat?.counts?.[String(answer)] ?? 0);
+        const total = Number(stat?.n ?? 0);
+        const percentage = total > 0 ? (count / total) * 100 : 0;
+        element.style.backgroundColor = percentageToGrayscaleStep(percentage);
+        element.innerHTML = '';
+        element.title = total > 0
+            ? `${count}/${total} panelistas (${percentage.toFixed(1)}%) respondieron ${answer} en ronda 1`
+            : `Sin respuestas en ronda 1 para ${answer}`;
+    }
+}
+
+function medianToPlaceholderIndex(median) {
+    const numeric = Number(median);
+    if (!Number.isFinite(numeric)) return null;
+    const clamped = Math.min(9, Math.max(1, numeric));
+    const roundedToHalf = Math.round(clamped * 2) / 2;
+    return 12 + Math.round((roundedToHalf - 1) * 2);
+}
+
+function answerToPreviousPlaceholderIndex(answer) {
+    const numeric = Number(answer);
+    if (!Number.isInteger(numeric) || numeric < 1 || numeric > 9) return null;
+    return 37 + numeric;
+}
+
+function renderRoundTwoComparatives() {
+    clearComparisonMarkers();
+    if (ROUND_NUMBER !== 2) return;
+    const questionNumber = getQuestionNumber();
+    const stat = round1Stats[questionNumber];
+    renderRoundOneDistribution(stat);
+    if (stat && stat.median !== null && stat.median !== undefined) {
+        const medianPlaceholder = medianToPlaceholderIndex(stat.median);
+        const medianElement = medianPlaceholder ? document.getElementById(`placeholder${medianPlaceholder}`) : null;
+        if (medianElement) {
+            const hasConsensus = stat.consensus === true || stat.consensus === 'true' || stat.consensus === 1;
+            medianElement.innerHTML = hasConsensus ? GROUP_ICON_CONSENSUS : GROUP_ICON_NO_CONSENSUS;
+            medianElement.title = `Mediana ronda 1: ${stat.median}; P30: ${stat.p30}; P70: ${stat.p70}; DI: ${stat.di}; consenso: ${hasConsensus ? 'sí' : 'no'}`;
+        }
+    }
+    const previous = previousRoundAnswers[questionNumber];
+    if (previous && previous.answer) {
+        const previousPlaceholder = answerToPreviousPlaceholderIndex(previous.answer);
+        const previousElement = previousPlaceholder ? document.getElementById(`placeholder${previousPlaceholder}`) : null;
+        if (previousElement) {
+            previousElement.innerHTML = USER_ICON;
+            previousElement.title = `Tu respuesta en ronda 1: ${previous.answer}`;
+        }
+    }
+}
+
+function loadRow(rowIndex) {
+    if (!csvData.length) return;
+    currentRow = Math.max(0, Math.min(rowIndex, csvData.length - 1));
+    const row = csvData[currentRow];
+    for (let i = 1; i <= TOTAL_PLACEHOLDERS; i++) {
+        const element = document.getElementById(`placeholder${i}`);
+        if (!element) continue;
+        if (i === 1) {
+            element.innerHTML = '&#9313;';
+            continue;
+        }
+        if (i === 4) {
+            element.textContent = panelistName || '';
+            continue;
+        }
+        const value = row[`placeholder${i}`] ?? '';
+        if (i >= 29 && i <= 37) {
+            element.style.backgroundColor = String(value).trim() || 'transparent';
+            element.innerHTML = '';
+            continue;
+        }
+        if (i === 47) {
+            element.value = '';
+            continue;
+        }
+        if (isComparisonMarkerPlaceholder(i)) {
+            element.innerHTML = '';
+            element.title = '';
+            continue;
+        }
+        if (element.matches('input, textarea, select')) element.value = value;
+        else element.innerHTML = value;
+    }
+    applyPanelistName();
+    updateProgressBar(row);
+    renderRoundTwoComparatives();
+    restoreCurrentResponse();
+    updateNavigationButtons();
+    setSaveStatus('');
+}
+
+function applyPanelistName() {
+    const panelistPlaceholder = document.getElementById('placeholder4');
+    if (panelistPlaceholder) panelistPlaceholder.textContent = panelistName || '';
+}
+
+async function startQuestionnaire() {
+    const input = document.getElementById('panelistInput');
+    const modal = document.getElementById('nameModal');
+    const name = input ? input.value.trim() : '';
+    if (!name) {
+        if (input) { input.focus(); input.style.border = '2px solid #A83880'; }
+        return;
+    }
+    panelistName = name;
+    setSaveStatus('Cargando respuestas previas...');
+    await loadServerContext();
+    loadLocalResponses();
+    applyPanelistName();
+    loadRow(currentRow);
+    if (modal) modal.style.display = 'none';
+    const commentInput = document.getElementById('placeholder47');
+    if (commentInput) commentInput.focus();
+}
+
+async function loadServerContext() {
+    if (!panelistName) return;
+    try {
+        const response = await fetch(`${SAVE_ENDPOINT}?action=context&round=${ROUND_NUMBER}&panelist=${encodeURIComponent(panelistName)}`, { cache: 'no-store' });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || 'No se pudo cargar contexto del servidor.');
+        responseCache = result.current_answers || {};
+        if (ROUND_NUMBER === 2) {
+            previousRoundAnswers = result.previous_answers || {};
+            round1Stats = result.round1_stats || {};
+        }
+    } catch (error) {
+        console.warn('No se pudo cargar contexto del servidor. Se usará almacenamiento local.', error);
+        responseCache = {};
+    }
+}
+
+function updateProgressBar(row) {
+    const progressBar = document.getElementById('progressBar');
+    if (!progressBar) return;
+    const currentQuestion = Number(row.placeholder2);
+    const totalQuestions = Number(row.placeholder3);
+    if (Number.isFinite(currentQuestion) && Number.isFinite(totalQuestions) && totalQuestions > 0) {
+        progressBar.value = currentQuestion;
+        progressBar.max = totalQuestions;
+    }
+}
+
+function updateNavigationButtons() {
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    if (prevBtn) prevBtn.disabled = currentRow === 0 || saveInProgress;
+    if (nextBtn) {
+        nextBtn.disabled = saveInProgress;
+        nextBtn.textContent = currentRow === csvData.length - 1 ? 'Guardar' : 'Siguiente';
+    }
+}
+
+function showLoadError(message) {
+    console.error(message);
+    const questionContainer = document.getElementById('placeholder7');
+    if (questionContainer) questionContainer.innerHTML = `No se pudo cargar la interfaz. ${message}`;
+}
+
+function getQuestionNumber() {
+    const questionElement = document.getElementById('placeholder6');
+    const value = questionElement ? questionElement.textContent.trim() : '';
+    return value || String(currentRow + 1);
+}
+
+function getSelectedAnswer() {
+    const selected = document.querySelector('input[name="answerScore"]:checked');
+    return selected ? selected.value : '';
+}
+
+function showAnswerRequiredError() {
+    setSaveStatus('Selecciona una respuesta antes de continuar.', 'error');
+    const firstRadio = document.querySelector('input[name="answerScore"]');
+    if (firstRadio) firstRadio.focus({ preventScroll: true });
+}
+
+function validateCurrentAnswer() {
+    if (getSelectedAnswer()) return true;
+    showAnswerRequiredError();
+    return false;
+}
+
+function selectScore(value, saveImmediately = true) {
+    const radio = document.querySelector(`input[name="answerScore"][value="${value}"]`);
+    if (!radio) return;
+    radio.checked = true;
+    storeCurrentResponseLocally();
+    setSaveStatus('');
+    if (saveImmediately) saveCurrentQuestion();
+}
+
+function clearSelectedAnswer() {
+    document.querySelectorAll('input[name="answerScore"]').forEach(function(radio) { radio.checked = false; });
+}
+
+function restoreCurrentResponse() {
+    clearSelectedAnswer();
+    const questionNumber = getQuestionNumber();
+    const cached = responseCache[questionNumber];
+    const commentInput = document.getElementById('placeholder47');
+    if (cached && cached.answer) {
+        const radio = document.querySelector(`input[name="answerScore"][value="${cached.answer}"]`);
+        if (radio) radio.checked = true;
+    }
+    if (commentInput) commentInput.value = (cached && typeof cached.comment === 'string') ? cached.comment : '';
+}
+
+function getLocalStorageKey() {
+    return LOCAL_STORAGE_PREFIX + encodeURIComponent(panelistName || 'anonymous');
+}
+
+function loadLocalResponses() {
+    try {
+        const raw = localStorage.getItem(getLocalStorageKey());
+        const local = raw ? JSON.parse(raw) : {};
+        responseCache = Object.assign({}, local, responseCache);
+    } catch (error) {
+        console.warn('No se pudieron cargar respuestas locales.', error);
+    }
+}
+
+function persistLocalResponses() {
+    try { localStorage.setItem(getLocalStorageKey(), JSON.stringify(responseCache)); }
+    catch (error) { console.warn('No se pudieron guardar respuestas locales.', error); }
+}
+
+function storeCurrentResponseLocally() {
+    const questionNumber = getQuestionNumber();
+    const commentInput = document.getElementById('placeholder47');
+    if (!questionNumber) return;
+    responseCache[questionNumber] = {
+        answer: getSelectedAnswer(),
+        comment: commentInput ? commentInput.value : '',
+        row_index: currentRow + 1,
+        updated_at: new Date().toISOString()
+    };
+    persistLocalResponses();
+}
+
+function setSaveStatus(message, type = '') {
+    const status = document.getElementById('saveStatus');
+    if (!status) return;
+    status.className = type;
+    status.textContent = message;
+}
+
+function buildSavePayload() {
+    const commentInput = document.getElementById('placeholder47');
+    const questionTextElement = document.getElementById('placeholder7');
+    const panelist = panelistName || (document.getElementById('placeholder4')?.textContent.trim() || '');
+    return {
+        round: ROUND_NUMBER,
+        panelist: panelist,
+        question: getQuestionNumber(),
+        question_text: questionTextElement ? questionTextElement.textContent.trim() : '',
+        answer: getSelectedAnswer(),
+        comment: commentInput ? commentInput.value : '',
+        row_index: currentRow + 1
+    };
+}
+
+async function saveCurrentQuestion(options = {}) {
+    if (!panelistName) return false;
+    storeCurrentResponseLocally();
+    const payload = buildSavePayload();
+    const requireAnswer = options.requireAnswer === true;
+    if (!payload.answer) {
+        if (requireAnswer) {
+            showAnswerRequiredError();
+            return false;
+        }
+        return true;
+    }
+    try {
+        saveInProgress = true;
+        updateNavigationButtons();
+        if (!options.silent) setSaveStatus('Guardando...');
+        const response = await fetch(SAVE_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json().catch(function() { return { success: false, message: 'Respuesta no JSON del servidor.' }; });
+        if (!response.ok || !result.success) throw new Error(result.message || `HTTP ${response.status}`);
+        setSaveStatus('Guardado', 'saved');
+        return true;
+    } catch (error) {
+        console.error('Save failed:', error);
+        setSaveStatus('No se pudo guardar', 'error');
+        return false;
+    } finally {
+        saveInProgress = false;
+        updateNavigationButtons();
+    }
+}
+
+function scheduleSave() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function() { saveCurrentQuestion({ silent: true }); }, 800);
+}
+
+async function goToRow(rowIndex, options = {}) {
+    clearTimeout(saveTimer);
+    if (options.requireAnswer === true && !validateCurrentAnswer()) return false;
+    const saved = await saveCurrentQuestion(options);
+    if (!saved) return false;
+    loadRow(rowIndex);
+    return true;
+}
+
+async function goNext() {
+    if (!validateCurrentAnswer()) return false;
+    if (currentRow < csvData.length - 1) return await goToRow(currentRow + 1, { requireAnswer: true });
+    const saved = await saveCurrentQuestion({ requireAnswer: true });
+    if (saved) setSaveStatus('Última pregunta guardada', 'saved');
+    return saved;
+}
+
+async function goPrevious() {
+    if (currentRow > 0) await goToRow(currentRow - 1);
+}
+
+function handleQuestionnaireKeydown(event) {
+    const modal = document.getElementById('nameModal');
+    const modalVisible = modal && modal.style.display !== 'none';
+    if (modalVisible) return;
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    const commentInput = document.getElementById('placeholder47');
+    if (/^[1-9]$/.test(event.key)) {
+        event.preventDefault();
+        selectScore(event.key, true);
+        if (commentInput) commentInput.focus();
+        return;
+    }
+    if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        goNext();
+        return;
+    }
+    if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        goPrevious();
+        return;
+    }
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        goNext();
+        return;
+    }
+    if (!commentInput) return;
+    if (event.key.length === 1 && document.activeElement !== commentInput) {
+        event.preventDefault();
+        commentInput.focus();
+        const start = commentInput.selectionStart ?? commentInput.value.length;
+        const end = commentInput.selectionEnd ?? commentInput.value.length;
+        commentInput.value = commentInput.value.slice(0, start) + event.key + commentInput.value.slice(end);
+        const newPosition = start + event.key.length;
+        commentInput.setSelectionRange(newPosition, newPosition);
+        storeCurrentResponseLocally();
+        scheduleSave();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    installConfidentialityControls();
+    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const startBtn = document.getElementById('startBtn');
+    const panelistInput = document.getElementById('panelistInput');
+    const commentInput = document.getElementById('placeholder47');
+    if (nextBtn) nextBtn.addEventListener('click', goNext);
+    if (prevBtn) prevBtn.addEventListener('click', goPrevious);
+    if (startBtn) startBtn.addEventListener('click', startQuestionnaire);
+    if (panelistInput) {
+        panelistInput.focus();
+        panelistInput.addEventListener('input', function() { panelistInput.style.border = ''; });
+        panelistInput.addEventListener('keydown', function(event) { if (event.key === 'Enter') startQuestionnaire(); });
+    }
+    document.querySelectorAll('input[name="answerScore"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            storeCurrentResponseLocally();
+            saveCurrentQuestion();
+            if (commentInput) commentInput.focus();
+        });
+    });
+    if (commentInput) {
+        commentInput.addEventListener('input', function() {
+            storeCurrentResponseLocally();
+            scheduleSave();
+        });
+    }
+    document.addEventListener('keydown', handleQuestionnaireKeydown);
+    window.addEventListener('beforeunload', function() {
+        storeCurrentResponseLocally();
+        const payload = buildSavePayload();
+        if (!panelistName || !payload.answer) return;
+        try {
+            const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+            navigator.sendBeacon(SAVE_ENDPOINT, blob);
+        } catch (error) {
+            console.warn('No se pudo enviar el guardado final.', error);
+        }
+    });
+    loadCSV().catch(function(error) { showLoadError(error.message); });
+    loadPanelistDropdown();
+});
+</script>
+
+</body>
+</head>
+
+</html>

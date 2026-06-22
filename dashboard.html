@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard RAND/UCLA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Afacad&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Afacad", sans-serif;
+            font-weight: 100;
+        }
+
+        body {
+            margin: 0;
+            background: #DFE7EF;
+            color: #182230;
+        }
+
+        .topbar {
+            background: #182230;
+            color: #ffffff;
+            padding: 14px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand i {
+            font-size: 24px;
+        }
+
+        .brand-title {
+            font-size: 20px;
+            font-weight: bold;
+            line-height: 1.1;
+        }
+
+        .brand-subtitle {
+            color: #0BAAAA;
+            font-size: 15px;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .powered-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .powered-logo span {
+            color: #ffffff;
+            font-size: 11px;
+            letter-spacing: .04em;
+            opacity: .8;
+            white-space: nowrap;
+        }
+
+        .powered-logo a {
+            display: inline-block;
+            line-height: 0;
+        }
+
+        .powered-logo img {
+            width: 190px;
+            max-height: 44px;
+            object-fit: contain;
+        }
+
+        select, button, a.button-link {
+            border-radius: 8px;
+            border: 2px solid #E8EAEF;
+            background: #ffffff;
+            color: #182230;
+            padding: 8px 12px;
+            font-size: 15px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button.primary, a.primary {
+            background: #0BAAAA;
+            border-color: #0BAAAA;
+            color: #ffffff;
+        }
+
+        main {
+            width: min(1200px, 94vw);
+            margin: 24px auto 40px auto;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card, .question-card {
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 8px 22px rgba(24, 34, 48, 0.08);
+            border: 1px solid #E8EAEF;
+        }
+
+        .summary-card {
+            padding: 16px 18px;
+        }
+
+        .summary-label {
+            color: #696969;
+            font-size: 13px;
+        }
+
+        .summary-value {
+            margin-top: 4px;
+            color: #182230;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .question-card {
+            margin-bottom: 18px;
+            overflow: hidden;
+        }
+
+        .question-header {
+            border-left: 7px solid #0BAAAA;
+            padding: 18px 20px 12px 20px;
+        }
+
+        .question-kicker {
+            color: #0BAAAA;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .question-title {
+            font-size: 18px;
+            line-height: 1.25;
+            font-weight: bold;
+        }
+
+        .metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 0 20px 16px 20px;
+        }
+
+        .pill {
+            border-radius: 999px;
+            padding: 6px 10px;
+            border: 1px solid #E8EAEF;
+            background: #F7F9FB;
+            font-size: 14px;
+            color: #182230;
+        }
+
+        .pill.consensus-yes {
+            background: #DCEFF0;
+            border-color: #0BAAAA;
+            color: #0B7777;
+            font-weight: bold;
+        }
+
+        .pill.consensus-no {
+            background: #F5E8F1;
+            border-color: #A83880;
+            color: #A83880;
+            font-weight: bold;
+        }
+
+        .distribution-wrap {
+            padding: 0 20px 18px 20px;
+            overflow-x: auto;
+        }
+
+        table.distribution {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            min-width: 720px;
+        }
+
+        table.distribution th, table.distribution td {
+            text-align: center;
+            border: 1px solid #E8EAEF;
+            padding: 8px 6px;
+        }
+
+        table.distribution th {
+            background: #182230;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .score-cell {
+            font-weight: bold;
+            color: #182230;
+        }
+
+        .bar-cell {
+            height: 26px;
+            border-radius: 6px;
+            border: 1px solid #E8EAEF;
+        }
+
+        .comments {
+            border-top: 1px solid #E8EAEF;
+            padding: 14px 20px 18px 20px;
+        }
+
+        .comments-title {
+            color: #696969;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .comment-item {
+            background: #F7F9FB;
+            border: 1px solid #E8EAEF;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-top: 8px;
+        }
+
+        .comment-meta {
+            color: #696969;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .comment-text {
+            font-size: 15px;
+            line-height: 1.35;
+        }
+
+        #status {
+            color: #696969;
+            margin: 16px 0;
+            font-size: 15px;
+        }
+
+        #status.error {
+            color: #A83880;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand">
+            <i class="fas fa-chart-column"></i>
+            <div>
+                <div class="brand-title">Dashboard RAND/UCLA</div>
+                <div class="brand-subtitle">Cuestionario de consenso</div>
+            </div>
+        </div>
+        <div class="powered-logo">
+            <span>powered by</span>
+            <a href="https://www.aequitasmedica.com" target="_blank" rel="noopener noreferrer" aria-label="Aequitas Medica website"><img src="Logo.png" alt="Aequitas Medica"></a>
+        </div>
+        <div class="controls">
+            <label for="roundSelect">Ronda</label>
+            <select id="roundSelect">
+                <option value="1">Ronda 1</option>
+                <option value="2">Ronda 2</option>
+            </select>
+            <button id="refreshBtn" class="primary">Actualizar</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="status">Cargando dashboard...</div>
+        <section class="summary-grid" id="summary"></section>
+        <section id="questions"></section>
+    </main>
+
+    <script>
+        const SAVE_ENDPOINT = 'save.php';
+        const DISTRIBUTION_COLORS = ['#FFFFFF', '#F2F2F2', '#D9D9D9', '#BFBFBF', '#6B6B6B'];
+
+        function percentageToGrayscaleStep(percentage) {
+            const p = Number(percentage);
+            if (!Number.isFinite(p) || p <= 0) return DISTRIBUTION_COLORS[0];
+            if (p <= 10) return DISTRIBUTION_COLORS[1];
+            if (p <= 25) return DISTRIBUTION_COLORS[2];
+            if (p <= 50) return DISTRIBUTION_COLORS[3];
+            return DISTRIBUTION_COLORS[4];
+        }
+
+        function el(tag, className, text) {
+            const node = document.createElement(tag);
+            if (className) node.className = className;
+            if (text !== undefined && text !== null) node.textContent = String(text);
+            return node;
+        }
+
+        function formatNumber(value) {
+            if (value === null || value === undefined || value === '') return 'NA';
+            const numeric = Number(value);
+            return Number.isFinite(numeric) ? numeric.toFixed(3).replace(/\.000$/, '') : String(value);
+        }
+
+        function renderSummary(data) {
+            const summary = document.getElementById('summary');
+            summary.innerHTML = '';
+            const questions = data.questions || [];
+            const consensusCount = questions.filter(q => q.consensus === true).length;
+            const commentCount = questions.reduce((acc, q) => acc + ((q.comments || []).length), 0);
+            const cards = [
+                ['Panelistas', (data.panelists || []).length],
+                ['Preguntas con respuesta', questions.length],
+                ['Con consenso', consensusCount],
+                ['Comentarios', commentCount]
+            ];
+            cards.forEach(([label, value]) => {
+                const card = el('div', 'summary-card');
+                card.appendChild(el('div', 'summary-label', label));
+                card.appendChild(el('div', 'summary-value', value));
+                summary.appendChild(card);
+            });
+        }
+
+        function renderDistribution(question) {
+            const wrap = el('div', 'distribution-wrap');
+            const table = el('table', 'distribution');
+            const head = document.createElement('thead');
+            const rowHead = document.createElement('tr');
+            rowHead.appendChild(el('th', '', 'Respuesta'));
+            for (let i = 1; i <= 9; i++) rowHead.appendChild(el('th', '', i));
+            head.appendChild(rowHead);
+            table.appendChild(head);
+
+            const body = document.createElement('tbody');
+            const countRow = document.createElement('tr');
+            countRow.appendChild(el('td', 'score-cell', 'n'));
+            for (let i = 1; i <= 9; i++) {
+                countRow.appendChild(el('td', '', question.counts?.[i] ?? question.counts?.[String(i)] ?? 0));
+            }
+            body.appendChild(countRow);
+
+            const percentRow = document.createElement('tr');
+            percentRow.appendChild(el('td', 'score-cell', '%'));
+            for (let i = 1; i <= 9; i++) {
+                const pct = Number(question.percentages?.[i] ?? question.percentages?.[String(i)] ?? 0);
+                percentRow.appendChild(el('td', '', `${formatNumber(pct)}%`));
+            }
+            body.appendChild(percentRow);
+
+            const heatRow = document.createElement('tr');
+            heatRow.appendChild(el('td', 'score-cell', 'Distribución'));
+            for (let i = 1; i <= 9; i++) {
+                const pct = Number(question.percentages?.[i] ?? question.percentages?.[String(i)] ?? 0);
+                const cell = el('td');
+                const bar = el('div', 'bar-cell');
+                bar.style.backgroundColor = percentageToGrayscaleStep(pct);
+                bar.title = `${formatNumber(pct)}% respondió ${i}`;
+                cell.appendChild(bar);
+                heatRow.appendChild(cell);
+            }
+            body.appendChild(heatRow);
+            table.appendChild(body);
+            wrap.appendChild(table);
+            return wrap;
+        }
+
+        function renderComments(question) {
+            const comments = el('div', 'comments');
+            comments.appendChild(el('div', 'comments-title', `Comentarios (${(question.comments || []).length})`));
+            if (!question.comments || question.comments.length === 0) {
+                comments.appendChild(el('div', 'comment-meta', 'Sin comentarios registrados.'));
+                return comments;
+            }
+            question.comments.forEach(item => {
+                const box = el('div', 'comment-item');
+                box.appendChild(el('div', 'comment-meta', `${item.panelist || 'Panelista'} · Respuesta ${item.answer || 'NA'} · ${item.saved_at || ''}`));
+                box.appendChild(el('div', 'comment-text', item.comment || ''));
+                comments.appendChild(box);
+            });
+            return comments;
+        }
+
+        function renderQuestions(data) {
+            const container = document.getElementById('questions');
+            container.innerHTML = '';
+            const questions = data.questions || [];
+            if (!questions.length) {
+                container.appendChild(el('div', 'summary-card', 'Todavía no hay respuestas para esta ronda.'));
+                return;
+            }
+
+            questions.forEach(question => {
+                const card = el('article', 'question-card');
+                const header = el('div', 'question-header');
+                header.appendChild(el('div', 'question-kicker', `Pregunta ${question.question}`));
+                header.appendChild(el('div', 'question-title', question.question_text || 'Sin texto de pregunta registrado'));
+                card.appendChild(header);
+
+                const metrics = el('div', 'metrics');
+                metrics.appendChild(el('span', 'pill', `n = ${question.n}`));
+                metrics.appendChild(el('span', 'pill', `Mediana = ${formatNumber(question.median)}`));
+                metrics.appendChild(el('span', 'pill', `P30 = ${formatNumber(question.p30)}`));
+                metrics.appendChild(el('span', 'pill', `P70 = ${formatNumber(question.p70)}`));
+                metrics.appendChild(el('span', 'pill', `DI = ${formatNumber(question.di)}`));
+                metrics.appendChild(el('span', `pill ${question.consensus ? 'consensus-yes' : 'consensus-no'}`, question.consensus ? 'Consenso' : 'Sin consenso'));
+                card.appendChild(metrics);
+
+                card.appendChild(renderDistribution(question));
+                card.appendChild(renderComments(question));
+                container.appendChild(card);
+            });
+        }
+
+        async function loadDashboard() {
+            const round = document.getElementById('roundSelect').value;
+            const status = document.getElementById('status');
+            status.className = '';
+            status.textContent = 'Cargando dashboard...';
+            try {
+                const response = await fetch(`${SAVE_ENDPOINT}?action=dashboard&round=${round}`, { cache: 'no-store' });
+                const data = await response.json();
+                if (!response.ok || !data.success) throw new Error(data.message || 'No se pudo cargar el dashboard.');
+                renderSummary(data);
+                renderQuestions(data);
+                status.textContent = `Última actualización: ${new Date(data.generated_at).toLocaleString()}`;
+            } catch (error) {
+                console.error(error);
+                status.className = 'error';
+                status.textContent = error.message || 'No se pudo cargar el dashboard.';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('refreshBtn').addEventListener('click', loadDashboard);
+            document.getElementById('roundSelect').addEventListener('change', loadDashboard);
+            loadDashboard();
+        });
+    </script>
+</body>
+</html>
